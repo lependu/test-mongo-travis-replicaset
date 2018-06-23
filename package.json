@@ -1,0 +1,31 @@
+{
+  "name": "test-mongo-travis-replicaset",
+  "version": "0.1.0",
+  "description": "Test travis build setup with mongodb replicaset and nodejs",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard --fix",
+    "test": "standard && tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lependu/test-mongo-travis-replicaset.git"
+  },
+  "keywords": [
+    "node.js"
+  ],
+  "author": "Ákos Kovács <lependu@protonmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lependu/test-mongo-travis-replicaset/issues"
+  },
+  "homepage": "https://github.com/lependu/test-mongo-travis-replicaset#readme",
+  "devDependencies": {
+    "standard": "^12.0.0",
+    "tap": "^12.0.1"
+  },
+  "dependencies": {
+    "mongodb": "^3.1.8"
+  }
+}
