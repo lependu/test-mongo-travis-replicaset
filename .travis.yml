@@ -1,15 +1,22 @@
 sudo: required
 
-language: node_js
+os: linux
 
-node_js:
-  - "10"
+language: minimal
 
 services:
   - docker
 
 before_install:
   - docker pull mongo:3.4.17-jessie
-  - docker run --name mongo1 -d -v $(pwd)/.mongodb:/etc/mongo mongo:3.4.17-jessie --config /etc/mongo/mongod-primary.conf
-  - docker run --name mongo2 -d -v $(pwd)/.docker:/etc/mongo mongo:3.4.17-jessie --config /etc/mongo/mongod-secondary.conf
-  - sleep 20
+  - docker pull node:10.13.0-alpine
+  - docker network create mongo-test-cluster
+  - docker run --name mongo1 -d --network mongo-test-cluster -v $(pwd)/.mongodb:/etc/mongodb mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
+  - docker run --name mongo2 -d --network mongo-test-cluster mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
+  - docker run --name mongo3 -d --network mongo-test-cluster mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
+  - sleep 10
+  - docker exec mongo1 bash -c "mongo /etc/mongodb/rs_create.js"
+  - docker run -ti -w /usr/src/app -v $(pwd):/usr/src/app node:10.13.0-alpine sh -c "npm i"
+
+script:
+  - docker run -ti -w /usr/src/app -v $(pwd):/usr/src/app --network mongo-test-cluster node:10.13.0-alpine sh -c "npm run test"
