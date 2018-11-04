@@ -1,6 +1,6 @@
 'use strict'
 
-const { test } =  require('tap')
+const { test } = require('tap')
 const { MongoClient } = require('mongodb')
 
 const MONGO_URI = 'mongodb://127.0.0.1:27017,127.0.0.1:27018/test?replicaSet=testReplicaSet'
