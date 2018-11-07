@@ -16,7 +16,7 @@ before_install:
   - bash -c "while true; do mongo --quiet --port 27017 --eval 'if (!db.stats().ok) { quit(1) }' || { sleep 2; continue; } && break; done;"
   - sudo -u mongodb mongod  --fork --replSet rs0 --port 27018 --bind_ip "127.0.0.1" --dbpath "/data/db2" --smallfiles --oplogSize 128 --logpath "/var/log/mongodb/mongod2.log" || { cat /var/log/mongodb/mongod2.log; exit 1; }
   - bash -c "while true; do mongo --quiet --port 27018 --eval 'if (!db.stats().ok) { quit(1) }' || { sleep 2; continue; } && break; done;"
-  - mongo --quiet --port 27017 .mongodb/rs_create.js || { cat /var/log/mongodb/mongod.log; cat /var/log/mongodb/mongod2.log; exit 1; }
+  - mongo --port 27017 .mongodb/rs_create.js || { cat /var/log/mongodb/mongod.log; cat /var/log/mongodb/mongod2.log; exit 1; }
   - sleep 5
 
 notifications:
