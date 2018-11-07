@@ -1,22 +1,25 @@
-sudo: required
-
 os: linux
 
-language: minimal
+language: node_js
 
-services:
-  - docker
+node_js:
+  - "11"
+  - "10"
+  - "8"
+  - "6"
 
 before_install:
-  - docker pull mongo:3.4.17-jessie
-  - docker pull node:10.13.0-alpine
-  - docker network create mongo-test-cluster
-  - docker run --name mongo1 -d --network mongo-test-cluster -v $(pwd)/.mongodb:/etc/mongodb mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
-  - docker run --name mongo2 -d --network mongo-test-cluster mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
-  - docker run --name mongo3 -d --network mongo-test-cluster mongo:3.4.17-jessie bash -c "mongod --quiet --replSet rs0"
-  - sleep 10
-  - docker exec mongo1 bash -c "mongo /etc/mongodb/rs_create.js"
-  - docker run -ti -w /usr/src/app -v $(pwd):/usr/src/app node:10.13.0-alpine sh -c "npm i"
+  - sudo mkdir -p /data/db /data/db2
+  - sudo chown -R mongodb /data
+  - sudo rm -rf /var/lib/mongodb/*
+  - sudo -u mongodb mongod --fork --replSet rs0 --port 27017 --bind_ip "127.0.0.1" --dbpath "/data/db" --smallfiles --oplogSize 128 --logpath "/var/log/mongodb/mongod.log" || { cat /var/log/mongodb/mongod.log; exit 1; }
+  - bash -c "while true; do mongo --quiet --port 27017 --eval 'if (!db.stats().ok) { quit(1) }' || { sleep 2; continue; } && break; done;"
+  - sudo -u mongodb mongod  --fork --replSet rs0 --port 27018 --bind_ip "127.0.0.1" --dbpath "/data/db2" --smallfiles --oplogSize 128 --logpath "/var/log/mongodb/mongod2.log" || { cat /var/log/mongodb/mongod2.log; exit 1; }
+  - bash -c "while true; do mongo --quiet --port 27018 --eval 'if (!db.stats().ok) { quit(1) }' || { sleep 2; continue; } && break; done;"
+  - mongo --quiet --port 27017 .mongodb/rs_create.js || { cat /var/log/mongodb/mongod.log; cat /var/log/mongodb/mongod2.log; exit 1; }
+  - sleep 5
 
-script:
-  - docker run -ti -w /usr/src/app -v $(pwd):/usr/src/app --network mongo-test-cluster node:10.13.0-alpine sh -c "npm run test"
+notifications:
+  email:
+    on_success: never
+    on_failure: never

@@ -3,7 +3,7 @@
 const { test } = require('tap')
 const { MongoClient } = require('mongodb')
 
-const MONGO_URI = 'mongodb://mongo1:27017,mongo2:27017,mongo3:27017/test?replicaSet=rs0'
+const MONGO_URI = 'mongodb://127.0.0.1:27017,127.0.0.1:27018/test?replicaSet=rs0'
 
 test('Smoke', t => {
   t.plan(6)
